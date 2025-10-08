@@ -9,6 +9,8 @@ class CurvedBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return SizedBox(
       height: 8.h,
       child: Stack(
@@ -22,42 +24,32 @@ class CurvedBottomNavBar extends StatelessWidget {
               topRight: Radius.circular(10),
             ),
             child: CustomPaint(
-              size: Size(MediaQuery.of(context).size.width, 10.h),
+              size: Size(screenWidth, 10.h),
               painter: NavBarCustomPainter(),
             ),
           ),
 
-          //    Floating Scan Button
+          // Floating Scan Button
           Positioned(
             top: -3.h,
             child: GestureDetector(
               onTap: () async {
-                // Step 1: Check if Location Services are enabled
-                final serviceEnabled =
-                    await Geolocator.isLocationServiceEnabled();
+                final serviceEnabled = await Geolocator.isLocationServiceEnabled();
                 if (!serviceEnabled) {
-                  ToastUtil.showToast(
-                      context, "Please enable location services");
-                  await Geolocator.openLocationSettings(); // Open settings
+                  ToastUtil.showToast(context, "Please enable location services");
+                  await Geolocator.openLocationSettings();
                   return;
                 }
 
-                // Step 2: Check for location permissions
-                LocationPermission permission =
-                    await Geolocator.checkPermission();
+                LocationPermission permission = await Geolocator.checkPermission();
                 if (permission == LocationPermission.denied) {
                   permission = await Geolocator.requestPermission();
                 }
-
-                // Step 3: Block access if permission is still denied
-                if (permission == LocationPermission.denied ||
-                    permission == LocationPermission.deniedForever) {
-                  ToastUtil.showToast(
-                      context, "Location permission is required");
+                if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+                  ToastUtil.showToast(context, "Location permission is required");
                   return;
                 }
 
-                // Step 4: All good → Go to QR Scanner
                 if (context.mounted) {
                   context.push('/QRscanner');
                 }
@@ -101,30 +93,38 @@ class CurvedBottomNavBar extends StatelessWidget {
             right: 0,
             bottom: 0,
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 5.w),
+              padding: EdgeInsets.symmetric(horizontal: 3.w),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _BottomBarButton(
-                    onTap: () => context.push('/meeting'),
-                    icon: Icons.people,
-                    label: 'Meeting',
+                  Expanded(
+                    child: _BottomBarButton(
+                      onTap: () => context.push('/meeting'),
+                      icon: Icons.people,
+                      label: 'Meeting',
+                    ),
                   ),
-                  _BottomBarButton(
-                    onTap: () => context.push('/ChapterDetails'),
-                    icon: Icons.groups,
-                    label: 'Chapters',
+                  Expanded(
+                    child: _BottomBarButton(
+                      onTap: () => context.push('/ChapterDetails'),
+                      icon: Icons.groups,
+                      label: 'Chapters',
+                    ),
                   ),
-                  SizedBox(width: 16.w), // Leave space for the center button
-                  _BottomBarButton(
-                    onTap: () => context.push('/Event'),
-                    icon: Icons.event,
-                    label: 'Events',
+                  SizedBox(width: 16.w), // space for center scan button
+                  Expanded(
+                    child: _BottomBarButton(
+                      onTap: () => context.push('/Event'),
+                      icon: Icons.event,
+                      label: 'Events',
+                    ),
                   ),
-                  _BottomBarButton(
-                    onTap: () => context.push('/Registration'),
-                    icon: Icons.credit_card,
-                    label: 'Registration',
+                  Expanded(
+                    child: _BottomBarButton(
+                      onTap: () => context.push('/Registration'),
+                      icon: Icons.credit_card,
+                      label: 'Registration',
+                    ),
                   ),
                 ],
               ),
@@ -155,13 +155,14 @@ class _BottomBarButton extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, color: Colors.white, size: 7.w),
-          SizedBox(height: 0.3.h), // Reduced spacing
+          SizedBox(height: 0.3.h),
           Text(
             label,
             style: TextStyle(
               color: Colors.white,
-              fontSize: 13.sp,
+              fontSize: 12.sp,
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -173,11 +174,10 @@ class NavBarCustomPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF2C2B2B) // DO NOT CHANGE
+      ..color = const Color(0xFF2C2B2B)
       ..style = PaintingStyle.fill;
 
     final path = Path();
-
     final center = size.width / 2;
     final notchRadius = 36.0;
     final notchDepth = 28.0;
@@ -196,7 +196,7 @@ class NavBarCustomPainter extends CustomPainter {
     // Notch semi-circle
     path.arcToPoint(
       Offset(center + notchRadius - 6, notchDepth / 2),
-      radius: Radius.circular(36),
+      radius: const Radius.circular(36),
       clockwise: false,
     );
 
